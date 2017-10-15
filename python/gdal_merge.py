@@ -511,5 +511,9 @@ def main( argv=None ):
     t_fh = None
 
 if __name__ == '__main__':
-    sys.exit(main())
+    if len(sys.argv) < 4:
+       Usage()
+    else:
+        main(sys.argv)
+
  

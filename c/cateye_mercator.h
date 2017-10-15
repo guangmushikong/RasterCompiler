@@ -58,6 +58,18 @@ public:
 	*/
 	void LonLatToMeters(double lon, double lat, double& mx, double& my);
 
+	/**!brief	Return tile by given lon/lat in WGS84 Datum
+	
+	\param[in]	lon
+	\param[in]	lat
+	\param[in]	zoom
+	\param[out]	mx
+	\param[out]	my
+
+	return 		void
+	*/
+	void LonLatToTile(double lon, double lat, int zoom, int& tx, int& ty);
+
 	/**!brief	Converts XY point from Spherical Mercator EPSG:900913 to 
 				lat/lon in WGS84 Datum
 	
@@ -101,7 +113,7 @@ public:
 	\param[in]	px 			pixels for x
 	\param[in]	py 			pixels for y
 	\param[out]	tx 			tiles for x
-	\param[out] ty 			tiles for y
+	\param[out]	ty 			tiles for y
 
 	\return 	void
 	*/
@@ -132,23 +144,64 @@ public:
 	void RasterToPixels(double rx, double ry, int zoom, double& px, double& py);
 
 	/**!brief 	Returns tile for given mercator coordinates
+
+	\param[in]	mx 			meters for x
+	\param[in]	my			meters for y
+	\param[in]	zoom 		zoom for level
+	\param[out]	tx 			tile for x
+	\param[out]	ty 			tile for y
+
+	\return 	void 
 	*/
 	void MetersToTile(double mx, double my, int zoom, int& tx, int& ty);
 
 	/**!brief 	Returns bounds of the given tile in EPSG:900913 coordinates
+
+	\param[in]	tx 			tile for x
+	\param[in]	ty			tile for y
+	\param[in]	zoom 		zoom for level
+	\param[out]	bounds[4]	bounds = [minx, miny, maxx, maxy]
+
+	\return 	void
 	*/
 	void TileMetersBounds(double tx, double ty, int zoom, double bounds[4]);
 
 	/**!brief 	Returns bounds of the given tile in lon/lat using WGS84 datum
+
+	\param[in]	tx 			tile for x
+	\param[in]	ty 			tile for y
+	\param[in]	zoom 		zoom for level
+	\param[out]	bounds 		bounds = [minLon, minLat, maxLon, maxLat]
+
+	\return 	void
 	*/
 	void TileLatLonBounds(int tx, int ty, int zoom, double bounds[4]);
 
+
+	/**!brief 	Returns tile bounds of the given  lon/lat bounds using WGS84 datum
+
+	\param[in]	lonLatBounds 			[minLon, minLat, maxLon, maxLat]
+	\param[in]	zoom 					zoom for level
+	\param[out]	tileBounds 				[minTx, minTx, maxTx, maxTy]
+
+	\return 	void
+	*/
+	void LonLatBoundsToTiles(double lonLatBounds[4], int zoom, int tileBounds[4]);
+
 	/**!brief 	Resolution (meters/pixel) for given zoom level (measured at 
 				Equator)
+
+	\param[in]	zoom 		zoom for level
+
+	\return 	double
 	*/
 	double Resolution(int zoom);
 
 	/**!brief 	Maximal scaledown zoom of the pyramid closest to the pixelSize.
+
+	\param[in]	pixelSize 	pyramid resolution
+
+	\return 	int
 	*/
 	int ZoomForPixelSize(double pixelSize);
 

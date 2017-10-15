@@ -510,8 +510,8 @@ class GDAL2Tiles(object):
 
 		# Tile format
 		self.tilesize = 256
-		self.tiledriver = 'PNG'
-		self.tileext = 'png'
+		self.tiledriver = 'GTiff'
+		self.tileext = 'tif'
 
 		# Should we read bigger window of the input raster and scale it down?
 		# Note: Modified leter by open_input()
