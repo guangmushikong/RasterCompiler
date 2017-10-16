@@ -173,24 +173,24 @@ namespace Cateye
 			\param[in]	tx 			tile for x
 			\param[in]	ty			tile for y
 			\param[in]	zoom 		zoom for level
-			\param[out]	bounds[4]	bounds = [minx, miny, maxx, maxy]
+			\param[out]	bound[4]	bounds = [minx, miny, maxx, maxy]
 
 			\return 	void
 			*/
-			void TileMetersBounds(double tx, double ty, int zoom, 
+			void TileMetersBound(double tx, double ty, int zoom, 
 				double bounds[4]);
 
-			/**!brief 	Returns bounds of the given tile in lon/lat using WGS84 datum
+			/**!brief 	Returns bound of the given tile in lon/lat using WGS84 datum
 
 			\param[in]	tx 			tile for x
 			\param[in]	ty 			tile for y
 			\param[in]	zoom 		zoom for level
-			\param[out]	bounds 		bounds = [minLon, minLat, maxLon, maxLat]
+			\param[out]	bound 		bound = [minLon, minLat, maxLon, maxLat]
 
 			\return 	void
 			*/
-			void TileLatLonBounds(int tx, int ty, int zoom, 
-				double bounds[4]);
+			void TileLatLonBound(int tx, int ty, int zoom, 
+				double bound[4]);
 
 
 			/**!brief 	Returns tile bounds of the given  lon/lat bounds using WGS84
@@ -202,8 +202,8 @@ namespace Cateye
 
 			\return 	void
 			*/
-			void LonLatBoundsToTiles(double lonLatBounds[4], int zoom,
-				int tileBounds[4]);
+			void LonLatBoundToTiles(double lonLatBound[4], int zoom,
+				int tileBound[4]);
 
 			/**!brief 	Resolution (meters/pixel) for given zoom level (measured at
 			Equator)
