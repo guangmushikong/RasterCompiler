@@ -12,52 +12,55 @@
 #ifndef CATEYE_SRTM_H
 #define CATEYE_SRTM_H
 
-#define CATEYE 
+#include "cateye_basic.h"
 
-class CATEYE Srtm
+namespace Cateye
 {
-/**
+	namespace RasterCompiler
+	{
+		class CATEYE_EXPORT Srtm
+		{
+			/**
 
-Lon/Lat:	WGS84 Datum
+			Lon/Lat:	WGS84 Datum
 
-Tile:	 	Tile Image Coordinate System TopLeft
-(0, 0) ----------------->
-	|
-	|
-	|
-	|
-	|
-	v
-*/
-public:
-	Srtm();
-	~Srtm();
+			Tile:	 	Tile Image Coordinate System TopLeft
+			(0, 0) ----------------->
+			|
+			|
+			|
+			|
+			|
+			v
+			*/
+		public:
+			Srtm();
+			~Srtm();
 
-	/**!brief	Return tile by given lon/lat in WGS84 Datum
-	
-	\param[in]	lon
-	\param[in]	lat
-	\param[out]	mx
-	\param[out]	my
+			/**!brief	Return tile by given lon/lat in WGS84 Datum
 
-	return 		void
-	*/
-	void LonLatToTile(double lon, double lat, int& tx, int& ty);
+			\param[in]	lon
+			\param[in]	lat
+			\param[out]	mx
+			\param[out]	my
 
-	/**!brief	Return tile & pixles by given lon/lat in WGS84 Datum
-	
-	\param[in]	lon
-	\param[in]	lat
-	\param[out]	mx
-	\param[out]	my
+			return 		void
+			*/
+			void LonLatToTile(double lon, double lat, int& tx, int& ty);
 
-	return 		void
-	*/
-	void LonLatToTilePixels(double lon, double lat, int& tx, int& ty
-		double& px, double& py);
+			/**!brief	Return tiles  by given lon/lat bound in WGS84 Datum
 
-protected:
+			\param[in]	lonLatBound = [minLon, minLat, maxLon, maxLat]
+			\param[out]	tileBound = [minTx, minTy, maxTx, maxTy]
+			\param[out]	my
 
+			return 		void
+			*/
+			void LonLatBoundToTiles(double lonLatBound[4], int tileBound[4]);
+		protected:
+			double _resolution;
 
+		}
+	}
 }
 #endif // CATEYE_SRTM_H
