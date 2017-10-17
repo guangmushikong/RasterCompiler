@@ -45,7 +45,7 @@ void Mercator::MetersToLonLat(double mx, double my, double& lon, double& lat)
 void Mercator::PixelsToMeters(double px, double py, int zoom, double& mx,
 	double& my)
 {
-	res = Resolution(zoom);
+	double res = Resolution(zoom);
 	mx = px * res - _originShift;
 	my = py * res - _originShift;
 	//return mx, my
@@ -54,7 +54,7 @@ void Mercator::PixelsToMeters(double px, double py, int zoom, double& mx,
 void Mercator::MetersToPixels(double mx, double my, int zoom, double& px, 
 	double& py)
 {
-	res = Resolution( zoom );
+	double res = Resolution( zoom );
 	px = (mx + _originShift) / res;
 	py = (my + _originShift) / res;
 	//return px, py
@@ -104,22 +104,27 @@ void Mercator::TileMetersBound(double tx, double ty, int zoom, double bound[4])
 	PixelsToMeters(tx * _tileSize, ty * _tileSize, zoom, minx, miny);
 	double maxx = 0, maxy = 0;
 	PixelsToMeters((tx + 1) * _tileSize, (ty + 1) * _tileSize, zoom, maxx, maxy);
-	bound = { minx, miny, maxx, maxy };
-	//return ( minx, miny, maxx, maxy )
+	bound[0] = minx;
+	bound[1] = miny;
+	bound[2] = maxx;
+	bound[3] = maxy;
 }
 
 void Mercator::TileLonLatBound(int tx, int ty, int zoom, double bound[4])
 {
-	//"Returns bounds of the given tile in latutude/longitude using WGS84 datum"
-	bounds[4] = {0};
-	TileBounds(tx, ty, zoom, bounds)
+	//"Returns bounds of the given tile in lon/lat using WGS84 datum"
+	bound = {0};
+	TileMetersBound(tx, ty, zoom, bound);
 	double minLat = 0, minLon = 0;
-	MetersToLonLat(bounds[0], bounds[1], minLon, minLat);
+	MetersToLonLat(bound[0], bound[1], minLon, minLat);
 
 	double maxLat = 0, maxLon = 0;
-	MetersToLonLat(bounds[2], bounds[3], maxLon, maxLat);
-	bound = { minLat, minLon, maxLat, maxLon };
-	//return ( minLat, minLon, maxLat, maxLon )
+	MetersToLonLat(bound[2], bound[3], maxLon, maxLat);
+	bound[0] = minLon;
+	bound[1] = minLat;
+	bound[2] = maxLon;
+	bound[3] = maxLat;
+	//bound = { minLon, minLat, maxLon, maxLat };
 }
 
 void Mercator::LonLatBoundToTiles(double lonLatBound[4], int zoom, 
@@ -136,7 +141,7 @@ double Mercator::Resolution(int zoom)
 	//"Resolution (meters/pixel) for given zoom level (measured at Equator)"
 
 	// return (2 * math.pi * 6378137) / (self.tileSize * 2**zoom)
-	return _initialResolution / (1 << zoom)
+	return _initialResolution / (1 << zoom);
 }
 
 int Mercator::ZoomForPixelSize(double pixelSize)
@@ -150,7 +155,7 @@ int Mercator::ZoomForPixelSize(double pixelSize)
 			if (0 != i)
 			{
 				/* code */
-				return i - 1
+				return i - 1;
 			}
 			else
 			{
@@ -166,7 +171,7 @@ void Mercator::GoogleTile(int tx, int ty, int zoom, int& gx, int& gy)
 	//"Converts TMS tile coordinates to Google Tile coordinates"
 
 	//coordinate origin is moved from bottom-left to top-left corner of the extent
-	qx = tx;
+	gx = tx;
 	gy = (1 << zoom - 1) - ty;
 	//return tx, (2**zoom - 1) - ty
 }
@@ -182,16 +187,17 @@ std::string Mercator::QuadTree(int tx, int ty, int zoom)
 		int digit = 0;
 
 		int mask = 1 << (i - 1);
-		if (tx & mask) != 0:
+		if ((tx & mask) != 0)
 		{
 			digit += 1;
 		}		
-		if (ty & mask) != 0:
+		if ((ty & mask) != 0)
 		{
 			digit += 2;
-		}		
-		quadKey += std::string(itoa(digit));
+		}
+	
+		quadKey += to_str(digit);
 	}
 
-	return quadKey
+	return quadKey;
 }

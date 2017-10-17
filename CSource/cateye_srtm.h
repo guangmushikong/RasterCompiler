@@ -60,7 +60,7 @@ namespace Cateye
 		protected:
 			double _resolution;
 
-		}
+		};
 	}
 }
 #endif // CATEYE_SRTM_H

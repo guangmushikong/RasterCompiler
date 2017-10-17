@@ -12,9 +12,9 @@
 #ifndef CATEYE_BASIC_H
 #define CATEYE_BASIC_H
 
-#include <math>
+#include <cmath>
 #include <string>
-
+#include <sstream>
 
 
 #if (defined WIN32 || defined _WIN32 || defined WINCE)
@@ -26,5 +26,13 @@
 #ifndef PI
 #  define PI             ((double)3.141592653589793238462643)
 #endif
+
+
+inline std::string to_str(double i)
+{
+	std::stringstream ss;
+	ss << i;
+	return ss.str();
+}
 
 #endif // CATEYE_BASIC_H

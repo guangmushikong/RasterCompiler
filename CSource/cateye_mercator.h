@@ -14,7 +14,7 @@
 
 #include "cateye_basic.h"
 
-#define MAXZOOMLEVEL = 32
+#define MAXZOOMLEVEL 32
 
 namespace Cateye
 {
@@ -189,7 +189,7 @@ namespace Cateye
 
 			\return 	void
 			*/
-			void TileLatLonBound(int tx, int ty, int zoom, 
+			void TileLonLatBound(int tx, int ty, int zoom, 
 				double bound[4]);
 
 
@@ -237,7 +237,7 @@ namespace Cateye
 			double  _initialResolution;
 			double _originShift;
 
-		}
+		};
 	}
 }
 #endif // CATEYE_MERCATOR_H
