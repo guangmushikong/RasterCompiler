@@ -19,8 +19,8 @@ class CateyeSRTM():
 		self.ext = ".zip"
 		self.imgfmt	= ".tif"
 		self.resolution	= 5.0
-		self.lonFromTo = [-180,	180]
-		self.latFromTo = [60, -60]
+		self.tileX = [1, 72]
+		self.tileY = [1, 24]
 		self.baseurl = (
 		"http://srtm.csi.cgiar.org/SRT-ZIP/SRTM_V41/SRTM_Data_GeoTiff/")
 		self.name =	'srtm'
@@ -36,10 +36,24 @@ class CateyeSRTM():
 		return min(y1, y2),	max(y1,	y2)
 
 	def	_lonToTileX(self, longitude):
-		return int((longitude +	180) / self.resolution)	+ 1
+		tilex = int((longitude +	180) / self.resolution) + 1
+
+		if tilex > self.tileX[1]:
+			tilex = self.tileX[1]
+		if tilex < self.tileX[0]:
+			tilex = self.tileX[0]
+
+		return tilex
 
 	def	_latToTileY(self, latitude):
-		return int((60 - latitude) / self.resolution) +	1
+
+		tiley = int((60 - latitude) / self.resolution) +	1
+		if tiley > self.tileY[1]:
+			tiley = self.tileY[1]
+		if tiley < self.tileY[0]:
+			tiley = self.tileY[0]
+
+		return tiley
 
 	def	lonlatToTile(self, longitude, latitude):
 		tileX =	self._lonToTileX(longitude)
@@ -81,8 +95,9 @@ class CateyeSRTM():
 	def	downloadTilesFromTo(self, txmin, txmax,	tymin, tymax):
 		imagefiles = []
 		for	tx in range(txmin, txmax + 1):
-			for	ty in range(tymin,tymax	+ 1):
+			for	ty in range(tymin,tymax + 1):
 				filename = "srtm_%02d_%02d"	% (tx, ty)
+				print filename
 				self.downloadName(filename)
 				imagefile =	os.path.join(self.workdir, filename, filename +	self.imgfmt)
 				if os.path.exists(imagefile):
@@ -92,7 +107,6 @@ class CateyeSRTM():
 	def	downloadFromTo(self, LonFromTo,	LatFromTo):
 		txmin, txmax = self.getTilesX(LonFromTo)
 		tymin, tymax = self.getTilesY(LatFromTo)
-
 		return self.downloadTilesFrom(txmin, txmax,	tymin, tymax)
 
 	def	getImageFromTiles(self,	txmin, txmax, tymin, tymax):
@@ -116,12 +130,12 @@ class CateyeSRTM():
 	def	Process(self, imagefile, lonFromTo,	latFromTo):
 		#A.	get	imagefiles
 		imagefiles = self.getImage(lonFromTo, latFromTo)
-		import gdal_merge
-		argv = ['gdal_merge.py','-o', imagefile]
+		import gdal_vrtmerge
+		argv = ['gdal_vrtmerge.py','-o', imagefile,]
 		for	imagefile in imagefiles:
 			argv.append(imagefile)
 		#print argv
-		gdal_merge.main(argv)
+		gdal_vrtmerge.run(argv)
 
 if __name__	== "__main__":
 	print "**"

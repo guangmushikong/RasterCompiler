@@ -29,12 +29,13 @@ class MapTiler():
 	def run(self, LonFromTo, LatFromTo):
 		 s = self.srcDriver.Create(self.srcDataDir)
 		 d = self.dstDriver.Create(self.dstDataDir)
-		 imagefile = os.path.join(self.work_root, "merge.tif")
+		 imagefile = os.path.join(self.work_root, "merge_color.vrt")
 		 s.Process(imagefile, LonFromTo, LatFromTo)
-		 d.Process(imagefile, LonFromTo, LatFromTo)
+		 #d.Process(imagefile, LonFromTo, LatFromTo)
 
 	def postProcess(self):
 		pass
+
 
 if __name__=='__main__':
 	if len(sys.argv) < 6:
@@ -46,5 +47,6 @@ if __name__=='__main__':
 		m = MapTiler(MapRoot)
 		m.run(LonFromTo, LatFromTo)
 	#example
-	maptiler = MapTiler("/Users/caiyuangang/work")
-	maptiler.run([112.5000005 - 5, 112.5000005 + 5.0 ], [37.5000001 - 5.0, 37.5000001 + 5.0])
+	maptiler = MapTiler("D:/person/work")
+	maptiler.run([-180, 180], [-60, 60])
+	#maptiler.run([112.5000005 - 5, 112.5000005 + 5.0], [37.5000001 - 5.0, 37.5000001 + 5.0])

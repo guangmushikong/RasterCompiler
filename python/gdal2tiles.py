@@ -47,6 +47,7 @@ except:
 
 import os
 import math
+import params
 
 try:
 	from PIL import Image
@@ -264,8 +265,8 @@ class GlobalMercator(object):
 	def TileBounds(self, tx, ty, zoom):
 		"Returns bounds of the given tile in EPSG:900913 coordinates"
 
-		minx, miny = self.PixelsToMeters( tx*self.tileSize, ty*self.tileSize, zoom )
-		maxx, maxy = self.PixelsToMeters( (tx+1)*self.tileSize, (ty+1)*self.tileSize, zoom )
+		minx, miny = self.PixelsToMeters( tx * self.tileSize, ty * self.tileSize, zoom )
+		maxx, maxy = self.PixelsToMeters( (tx + 1) * self.tileSize, (ty + 1) * self.tileSize, zoom )
 		return ( minx, miny, maxx, maxy )
 
 	def TileLatLonBounds(self, tx, ty, zoom ):
@@ -507,11 +508,10 @@ class GDAL2Tiles(object):
 		self.stopped = False
 		self.input = None
 		self.output = None
-
 		# Tile format
-		self.tilesize = 256
-		self.tiledriver = 'GTiff'
-		self.tileext = 'tif'
+		self.tilesize = params.params['tilesize']
+		self.tiledriver = params.params['tiledriver']
+		self.tileext = params.params['tileext']#'png' #'tif'
 
 		# Should we read bigger window of the input raster and scale it down?
 		# Note: Modified leter by open_input()
@@ -740,7 +740,7 @@ gdal2tiles temp.vrt""" % self.input )
 
 		# Get NODATA value
 		self.in_nodata = []
-		for i in range(1, self.in_ds.RasterCount+1):
+		for i in range(1, self.in_ds.RasterCount + 1):
 			if self.in_ds.GetRasterBand(i).GetNoDataValue() != None:
 				self.in_nodata.append( self.in_ds.GetRasterBand(i).GetNoDataValue() )
 		if self.options.srcnodata:
@@ -939,9 +939,9 @@ gdal2tiles temp.vrt""" % self.input )
 
 		# Output Bounds - coordinates in the output SRS
 		self.ominx = self.out_gt[0]
-		self.omaxx = self.out_gt[0]+self.out_ds.RasterXSize*self.out_gt[1]
+		self.omaxx = self.out_gt[0] + self.out_ds.RasterXSize * self.out_gt[1]
 		self.omaxy = self.out_gt[3]
-		self.ominy = self.out_gt[3]-self.out_ds.RasterYSize*self.out_gt[1]
+		self.ominy = self.out_gt[3] - self.out_ds.RasterYSize * self.out_gt[1]
 		# Note: maybe round(x, 14) to avoid the gdal_translate behaviour, when 0 becomes -1e-15
 
 		if self.options.verbose:
@@ -1176,7 +1176,7 @@ gdal2tiles temp.vrt""" % self.input )
 			print("tilebands: ", tilebands)
 
 		#print tminx, tminy, tmaxx, tmaxy
-		tcount = (1+abs(tmaxx-tminx)) * (1+abs(tmaxy-tminy))
+		tcount = (1 + abs(tmaxx - tminx)) * (1 + abs(tmaxy - tminy))
 		#print tcount
 		ti = 0
 
@@ -1258,7 +1258,7 @@ gdal2tiles temp.vrt""" % self.input )
 				# We scale down the query to the tilesize by supplied algorithm.
 
 				# Tile dataset in memory
-				dstile = self.mem_drv.Create('', self.tilesize, self.tilesize, tilebands)
+				dstile = self.mem_drv.Create('', self.tilesize, self.tilesize,  tilebands, self.in_ds.GetRasterBand(1).DataType)
 				data = ds.ReadRaster(rx, ry, rxsize, rysize, wxsize, wysize, band_list=list(range(1,self.dataBandsCount+1)))
 				alpha = self.alphaband.ReadRaster(rx, ry, rxsize, rysize, wxsize, wysize)
 
@@ -1272,7 +1272,7 @@ gdal2tiles temp.vrt""" % self.input )
 					# TODO: Use directly 'near' for WaveLet files
 				else:
 					# Big ReadRaster query in memory scaled to the tilesize - all but 'near' algo
-					dsquery = self.mem_drv.Create('', querysize, querysize, tilebands)
+					dsquery = self.mem_drv.Create('', querysize, querysize, tilebands, self.in_ds.GetRasterBand(1).DataType)
 					# TODO: fill the null value in case a tile without alpha is produced (now only png tiles are supported)
 					#for i in range(1, tilebands+1):
 					#	dsquery.GetRasterBand(1).Fill(tilenodata)
@@ -1312,9 +1312,9 @@ gdal2tiles temp.vrt""" % self.input )
 		# Usage of existing tiles: from 4 underlying tiles generate one as overview.
 
 		tcount = 0
-		for tz in range(self.tmaxz-1, self.tminz-1, -1):
+		for tz in range(self.tmaxz - 1, self.tminz - 1, -1):
 			tminx, tminy, tmaxx, tmaxy = self.tminmax[tz]
-			tcount += (1+abs(tmaxx-tminx)) * (1+abs(tmaxy-tminy))
+			tcount += (1 + abs(tmaxx - tminx)) * (1 + abs(tmaxy - tminy))
 
 		ti = 0
 
@@ -1322,8 +1322,8 @@ gdal2tiles temp.vrt""" % self.input )
 
 		for tz in range(self.tmaxz-1, self.tminz-1, -1):
 			tminx, tminy, tmaxx, tmaxy = self.tminmax[tz]
-			for ty in range(tmaxy, tminy-1, -1): #range(tminy, tmaxy+1):
-				for tx in range(tminx, tmaxx+1):
+			for ty in range(tmaxy, tminy -1, -1): #range(tminy, tmaxy+1):
+				for tx in range(tminx, tmaxx + 1):
 
 					if self.stopped:
 						break
@@ -1345,11 +1345,11 @@ gdal2tiles temp.vrt""" % self.input )
 					if not os.path.exists(os.path.dirname(tilefilename)):
 						os.makedirs(os.path.dirname(tilefilename))
 
-					dsquery = self.mem_drv.Create('', 2 * self.tilesize, 2 * self.tilesize, tilebands)
+					dsquery = self.mem_drv.Create('', 2 * self.tilesize, 2 * self.tilesize, tilebands, self.in_ds.GetRasterBand(1).DataType)
 					# TODO: fill the null value
 					#for i in range(1, tilebands+1):
 					#	dsquery.GetRasterBand(1).Fill(tilenodata)
-					dstile = self.mem_drv.Create('', self.tilesize, self.tilesize, tilebands)
+					dstile = self.mem_drv.Create('', self.tilesize, self.tilesize, tilebands, self.in_ds.GetRasterBand(1).DataType)
 
 					# TODO: Implement more clever walking on the tiles with cache functionality
 					# probably walk should start with reading of four tiles from top left corner
@@ -1367,15 +1367,15 @@ gdal2tiles temp.vrt""" % self.input )
 								else:
 									tileposy = self.tilesize
 								if tx:
-									tileposx = x % (2*tx) * self.tilesize
-								elif tx==0 and x==1:
+									tileposx = x % (2 * tx) * self.tilesize
+								elif tx == 0 and x == 1:
 									tileposx = self.tilesize
 								else:
 									tileposx = 0
 								dsquery.WriteRaster( tileposx, tileposy, self.tilesize, self.tilesize,
 									dsquerytile.ReadRaster(0,0,self.tilesize,self.tilesize),
 									band_list=list(range(1,tilebands+1)))
-								children.append( [x, y, tz+1] )
+								children.append( [x, y, tz + 1] )
 
 					self.scale_query_to_tile(dsquery, dstile, tilefilename)
 					# Write a copy of tile to png/jpg
@@ -1384,7 +1384,7 @@ gdal2tiles temp.vrt""" % self.input )
 						self.out_drv.CreateCopy(tilefilename, dstile, strict=0)
 
 					if self.options.verbose:
-						print("\tbuild from zoom", tz+1," tiles:", (2*tx, 2*ty), (2*tx+1, 2*ty),(2*tx, 2*ty+1), (2*tx+1, 2*ty+1))
+						print("\tbuild from zoom", tz+1," tiles:", (2 * tx, 2 * ty), (2 * tx+1, 2*ty),(2*tx, 2*ty+1), (2*tx+1, 2*ty+1))
 
 					# Create a KML file for this tile.
 					if self.kml:

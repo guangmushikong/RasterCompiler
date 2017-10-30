@@ -15,7 +15,7 @@ class CateyeMercator():
 
     def Process(self, imagefile, LonFromTo = None, LatFromTo = None):
         if imagefile is not None:
-            argv = ["gdal2tiles.py", "--profile=mercator", "-z 1-13", imagefile,
+            argv = ["gdal2tiles.py", "--profile=mercator", "-z 0-10", imagefile,
                     self.workdir]
             print argv
             self.ProcessArgv(argv)
