@@ -22,15 +22,33 @@ def FileStreamIO(start, end, url, filename):
         fp.write(r.content)
 
 
+def DownloadFile1(url, dst):
+    print 'downfile'
+    response = requests.get(url, stream=True)
+    print response
+    status = response.status_code
+    if status == 200:
+        #total_size = int(response.headers['Content-Length'])
+        with open(dst, 'wb') as of:
+            for chunk in response.iter_content(chunk_size=1024):
+                if chunk:
+                    of.write(chunk)
+
 def DownloadFile(url, dst, num_thread = 4):
+    if os.path.exists(dst):
+        return
+    if not os.path.exists(os.path.dirname(dst)):
+        os.makedirs(os.path.dirname(dst))
+
     r = requests.head(url)
     try:
         #file_name = url.split('/')[-1]
         # Content-Length获得文件主体的大小，当http服务器使用Connection:keep-alive时，不支持Content-Length
         file_size = int(r.headers['content-length'])
     except:
-        print("检查URL，或不支持对线程下载")
+        print(u"检查URL，或不支持对线程下载")
         return
+
 
     #  创建一个和要下载文件一样大小的文件
     fp = open(dst, "wb")
