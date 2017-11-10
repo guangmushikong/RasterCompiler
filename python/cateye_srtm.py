@@ -36,7 +36,7 @@ class CateyeSRTM():
 		return min(y1, y2),	max(y1,	y2)
 
 	def	_lonToTileX(self, longitude):
-		tilex = int((longitude +	180) / self.resolution) + 1
+		tilex = int((longitude + 180) / self.resolution) + 1
 
 		if tilex > self.tileX[1]:
 			tilex = self.tileX[1]
@@ -92,6 +92,16 @@ class CateyeSRTM():
 			os.remove(dstfile)
 		print filename + " is ok!"
 
+	def getfilename(self, tx, ty):
+		return "srtm_%2d_%2d" % (tx, ty)
+
+	def getfilenames(self, tx_min, tx_max, ty_min, ty_max):
+		ret = []
+		for tx in range(tx_min, tx_max + 1):
+			for ty in range(ty_min, ty_max + 1):
+				ret.append(self.getfilename(tx, ty))
+		return ret
+
 	def	downloadTilesFromTo(self, txmin, txmax,	tymin, tymax):
 		imagefiles = []
 		for	tx in range(txmin, txmax + 1):
@@ -126,6 +136,7 @@ class CateyeSRTM():
 
 	def	downloadAll(self):
 		self.downloadFromTo(self.lonFromTo,	self.latFromTo)
+
 
 	def	Process(self, imagefile, lonFromTo,	latFromTo):
 		#A.	get	imagefiles
