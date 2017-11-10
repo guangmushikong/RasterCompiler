@@ -51,7 +51,7 @@ if __name__=='__main__':
 		m = MapTiler(MapRoot)
 		m.run(LonFromTo, LatFromTo)
 	#example
-	maptiler = MapTiler(u"D:/person/work/Gujiao")
-	maptiler.process(u'D:/person/work/Gujiao/road.shp')
+	#maptiler = MapTiler()
+	#maptiler.process()
 	#maptiler.run([-180, 180], [-60, 60])
 	#maptiler.run([112.5000005 - 5, 112.5000005 + 5.0], [37.5000001 - 5.0, 37.5000001 + 5.0])
