@@ -8,6 +8,7 @@ Created on Sat Nov 18 13:02:18 2017
 
 try:
     from osgeo import gdal
+    from osgeo import osr
 except ImportError:
     import gdal
 
@@ -83,6 +84,47 @@ class Raster:
         print self.nodata
         print "***************************************"
 
+    def copy_info(self, dst):
+        #copy projection & geo transform
+        dst.SetGeoTransform(self.geotransform )
+        dst.SetProjection(self.projection)
+
+    def addBand(self, bandfile, dstfile):
+        band = gdal.Open(bandfile, gdal.GA_ReadOnly)
+        xsize = band.RasterXSize
+        ysize = band.RasterYSize
+        _band = band.RasterCount
+
+        if not (xsize == self.xsize and ysize == self.ysize):
+            print "rgb file and alpha file do not have the same size "
+            return
+
+        dst_drv = gdal.GetDriverByName("GTiff")
+        dst = dst_drv.Create(dstfile, self.xsize, self.ysize, self.bands + _band)
+
+        data = self.dataset.ReadRaster(0, 0, xsize, ysize, xsize, ysize)
+
+
+        banddata = band.ReadRaster(0, 0, xsize, ysize, xsize, ysize)
+
+        # Use the ReadRaster result directly in tiles ('nearest neighbour' query)
+        dst.WriteRaster(0, 0, xsize, ysize, data, band_list=list(range(1, self.bands + 1)))
+        dst.WriteRaster(0, 0, xsize, ysize, banddata,
+                        band_list=list(range(self.bands + 1, self.bands + _band + 1)))
+
+        dst.SetGeoTransform(self.geotransform)
+        dst.SetProjection(self.projection)
+        del dst
+
+    def repoject(self, dst_epsg, dstfile):
+        dst_drv = gdal.GetDriverByName("GTiff")
+        dst = dst_drv.Create(dstfile, self.xsize, self.ysize, self.bands)
+
+        dst_srs = osr.SpatialReference()
+        dst_srs.ImportFromEPSG(dst_epsg)
+        dst_srs_wkt = dst_srs.ExportToWkt()
+        dst = gdal.AutoCreateWarpedVRT(self.dataset, self.projection, dst_srs_wkt)
+        del dst
 
     def getPyramidDataSet(self, level):
         zoom = 2 ** level
