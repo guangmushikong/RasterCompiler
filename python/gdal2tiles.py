@@ -47,7 +47,6 @@ except:
 
 import os
 import math
-import params
 
 try:
 	from PIL import Image
@@ -501,6 +500,10 @@ class GDAL2Tiles(object):
 		"""Stop the rendering immediately"""
 		self.stopped = True
 
+	def set_format(self, tilesize, tiledriver, tileext):
+		self.tilesize = tilesize
+		self.tiledriver = tiledriver
+		self.tileext = tileext
 	# -------------------------------------------------------------------------
 	def __init__(self, arguments ):
 		"""Constructor function - initialization"""
@@ -558,7 +561,7 @@ class GDAL2Tiles(object):
 		if (len(self.args) > 1):
 			self.error("Processing of several input files is not supported.",
 			"""Please first use a tool like gdal_vrtmerge.py or gdal_merge.py on the files:
-gdal_vrtmerge.py -o merged.vrt %s""" % " ".join(self.args))
+			gdal_vrtmerge.py -o merged.vrt %s""" % " ".join(self.args))
 			# TODO: Call functions from gdal_vrtmerge.py directly
 
 		self.input = self.args[0]
