@@ -501,9 +501,9 @@ class GDAL2Tiles(object):
 		self.stopped = True
 
 	def set_format(self, tilesize, tiledriver, tileext):
-		self.tilesize = tilesize
-		self.tiledriver = tiledriver
-		self.tileext = tileext
+		self.tilesize = int(tilesize)
+		self.tiledriver = str(tiledriver)
+		self.tileext = str(tileext)
 	# -------------------------------------------------------------------------
 	def __init__(self, arguments ):
 		"""Constructor function - initialization"""
@@ -512,9 +512,9 @@ class GDAL2Tiles(object):
 		self.input = None
 		self.output = None
 		# Tile format
-		self.tilesize = params.params['tilesize']
-		self.tiledriver = params.params['tiledriver']
-		self.tileext = params.params['tileext']#'png' #'tif'
+		self.tilesize = 256
+		self.tiledriver = 'PNG'
+		self.tileext = 'png' #'tif'
 
 		# Should we read bigger window of the input raster and scale it down?
 		# Note: Modified leter by open_input()

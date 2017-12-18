@@ -137,16 +137,33 @@ class CateyeSRTM():
 	def	downloadAll(self):
 		self.downloadFromTo(self.lonFromTo,	self.latFromTo)
 
+	def Process(self, out_root, minLon, minLat, maxLon, maxLat):
+		self.Process(out_root, [minLon, maxLon], [minLat, maxLat])
 
-	def	Process(self, imagefile, lonFromTo,	latFromTo):
+	def	Process(self, out_root, lonFromTo, latFromTo):
 		#A.	get	imagefiles
-		imagefiles = self.getImage(lonFromTo, latFromTo)
-		import gdal_vrtmerge
-		argv = ['gdal_vrtmerge.py','-o', imagefile,]
-		for	imagefile in imagefiles:
-			argv.append(imagefile)
-		#print argv
-		gdal_vrtmerge.run(argv)
+		demfile = out_root + '/dem.vrt'
+		if not os.path.exists(demfile):
+			print "generate dem file..."
+			imagefiles = self.getImage(lonFromTo, latFromTo)
+			import gdal_vrtmerge
+			argv = ['gdal_vrtmerge.py','-o', demfile,]
+			for	imagefile in imagefiles:
+				argv.append(imagefile)
+				#print argv
+			gdal_vrtmerge.run(argv)
+		color = out_root + '/color.vrt'
+		if not os.path.exists(color):
+			print "generate color image"
+			self.genarate_color(demfile, color)
+		shade = out_root + '/shade.tif'
+		if not os.path.exists(shade):
+			print "generate hillshade image"
+			self.generate_hillshade(demfile, shade)
+		color_shade = out_root + '/color_shade.tif'
+		if not os.path.exists(color_shade):
+			print "generate color_shade image"
+			self.hsv_merge(color, shade, color_shade)
 
 if __name__	== "__main__":
 	print "**"
