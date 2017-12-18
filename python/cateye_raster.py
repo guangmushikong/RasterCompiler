@@ -22,11 +22,12 @@ import sys
 import math
 import os
 
+def Create(filepath):
+	return CateyeRaster(filepath)
 
-class Raster:
+class CateyeRaster:
 	def __init__(self, filepath):
 		gdal.AllRegister()
-
 		dataset = gdal.Open( filepath )
 		if dataset is None:
 			return None
@@ -48,9 +49,8 @@ class Raster:
 		self.geotransform = dataset.GetGeoTransform()
 		self.ulx = self.geotransform[0]
 		self.uly = self.geotransform[3]
-		self.lrx = self.ulx + self.geotransform[1] * self.xsize
-		self.lry = self.uly + self.geotransform[5] * self.ysize
-
+		self.lrx = self.ulx + self.geotransform[1] * self.xsize + self.geotransform[2] * self.ysize
+		self.lry = self.uly + self.geotransform[4] * self.xsize + self.geotransform[5] * self.ysize
 
 		ct = dataset.GetRasterBand(1).GetRasterColorTable()
 		if ct is not None:
@@ -126,11 +126,42 @@ class Raster:
 		dst = gdal.AutoCreateWarpedVRT(self.dataset, self.projection, dst_srs_wkt)
 		del dst
 
+	def PixelToMeters(self, px, py):
+		trans = self.geotransform
+		mx = trans[0] + px * trans[1] + py * trans[2]
+		my = trans[3] + px * trans[4] + py * trans[5]
+		return mx, my
+
+	def	MetersToLonLat(self, mx, my):
+		prosrs = osr.SpatialReference()
+		prosrs.ImportFromWkt(self.projection)
+		geosrs = prosrs.CloneGeogCS()
+		ct = osr.CoordinateTransformation(prosrs, geosrs)
+		coords = ct.TransformPoint(mx, my)
+		return coords[0], coords[1]
+
+	def LonLatToMeters(self, lon, lat):
+		prosrs = osr.SpatialReference()
+		prosrs.ImportFromWkt(self.projection)
+		geosrs = prosrs.CloneGeogCS()
+		ct = osr.CoordinateTransformation(geosrs,prosrs)
+		coords = ct.TransformPoint(lon, lat)
+		return coords[0], coords[1]
+
+	def MetersBound(self):
+		#ulx uly
+		return self.ulx, self.uly, self.lrx, self.lry
+
+	def LatLonBound(self):
+		minx, miny, maxx, maxy = self.MetersBound()
+		minLon, minLat = self.MetersToLonLat(minx, miny)
+		maxLon, maxLat = self.MetersToLonLat(maxx, maxy)
+		return minLon, minLat, maxLon, maxLat
+
 	def getPyramidDataSet(self, level):
 		zoom = 2 ** level
 		dstX = int(self.xsize / zoom)
 		dstY = int(self.ysize / zoom)
-
 
 		filepath = os.path.join(self.filedir, self.filename + "_" + str(level) + self.ext)
 		dst = self.driver.Create(filepath, dstX, dstY,  self.bands, self.band_type)
@@ -164,6 +195,9 @@ class Raster:
 		del dst
 
 		return Raster(filepath)
+
+	def Process(self, out_root, minLon, minLat, maxLon, maxLat):
+		pass
 
 	def write(self, filepath, dataset):
 		pass
