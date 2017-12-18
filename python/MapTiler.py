@@ -64,8 +64,7 @@ class MapTiler():
 
 	def process_dem(self, dem):
 		s = drivers[dem['src']['type']].Create(dem['src']['root'])
-		bound = dem['src']['bound']
-		s.Process(self.work_root, LonFromTo, LatFromTo)
+		s.Process(self.work_root, self.minLon, self.minLat, self.maxLon, self.maxLat)
 		dem = os.path.join(self.work_root, "dem.vrt")
 		d = drivers[dem['dst']['type']].Create(dem['dst']['root'])
 		d.Process(dem, 256, 'GTiff', 'tif')
@@ -73,7 +72,7 @@ class MapTiler():
 	def process_color_shade(self, shade):
 		s = drivers(dem['src']['type']).Create(shade['src']['root'])
 		bound = shade['src']['bound']
-		s.Process(self.work_root, LonFromTo, LatFromTo)
+		s.Process(self.work_root, self.minLon, self.minLat, self.maxLon, self.maxLat)
 		shade = os.path.join(self.work_root, "color_shade.tif")
 		d = drivers[shade['dst']['type']].Create(dem['dst']['root'])
 		d.Process(dem, 256, 'PNG', 'png')	
