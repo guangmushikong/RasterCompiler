@@ -38,7 +38,7 @@ class CateyeGoogleMap():
 				ti += 1
 				gx, gy = self.mercator.GoogleTile(tx, ty, tz)
 				srcfile = self.baseurl + "&x=" + str(gx) + "&y=" + str(gy) + "&z=" + str(tz)
-				dstfile = os.path.join(self.output, str(tz), str(tx), "%s.jpg" % ty)
+				dstfile = os.path.join(self.workdir, str(tz), str(tx), "%s.jpg" % ty)
 
 				basic.DownloadFile1(srcfile, dstfile)
 				self.progressbar( ti / float(tcount) )
