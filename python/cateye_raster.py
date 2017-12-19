@@ -204,22 +204,3 @@ class CateyeRaster:
 
 	def resize(self, dstX,  dstY):
 		pass
-
-
-if __name__=='__main__':
-#	if len(sys.argv) < 6:
-#		print " Usage: MapTiler.py MapRoot LonFrom LonTo LatFrom LatTo"
-#	else:
-#		MapRoot = sys.argv[1]
-#		LonFromTo = [float(sys.argv[2]), float(sys.argv[3])]
-#		LatFromTo = [float(sys.argv[4]), float(sys.argv[5])]
-#		m = MapTiler(MapRoot)
-#		m.run(LonFromTo, LatFromTo)
-	#example
-	raster = Raster("/Users/caiyuangang/work/gujiao/gujiao.tif")
-	raster.file_info()
-	for i in range(4, 9):
-		raster.getPyramidDataSet(i).file_info()
-
-    #raster4 = Raster("/Users/caiyuangang/work/gujiao/gujiao_4.tif")
-    #raster4.file_info()
