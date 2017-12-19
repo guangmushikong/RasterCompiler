@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 /*
-* \file 		: GoogleImage.h
+* \file 		: cateye_googlemap.py
 * \brief
 *
 * Project		:
