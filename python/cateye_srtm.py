@@ -9,6 +9,7 @@ import os
 import os.path
 
 import basic
+import subprocess
 
 def Create(workdir):
 	return CateyeSRTM(workdir)
@@ -70,7 +71,6 @@ class CateyeSRTM():
 
 		return (tileX, tileY, pixelX, pixelY)
 
-
 	def	downloadLonLat(self, lon, lat):
 		(x,	y) = (self._lonToTileX(lon), self._latToTileY(lat))
 		self.downloadTile(x, y)
@@ -81,14 +81,14 @@ class CateyeSRTM():
 
 	def	downloadName(self, filename):
 		#check if there	exists the directory
+		imagefile = os.path.join(self.workdir, filename, filename + self.imgfmt)
+		if os.path.exists(imagefile):
+			return
+		srcurl = os.path.join(self.baseurl,	filename + self.ext)
+		dstfile	= os.path.join(self.workdir, filename +	self.ext)
+		basic.DownloadFile1(srcurl, dstfile)
 		filedir	= os.path.join(self.workdir, filename)
-		if not os.path.exists(filedir):
-			os.mkdir(filedir)
-			srcurl = os.path.join(self.baseurl,	filename + self.ext)
-			dstfile	= os.path.join(self.workdir, filename +	self.ext)
-			if not os.path.exists(dstfile):
-				basic.DownloadFile(srcurl, dstfile)
-			basic.DecodeZipfile(dstfile, filedir)
+		if basic.DecodeZipfile(dstfile, filedir):
 			os.remove(dstfile)
 		print filename + " is ok!"
 
@@ -129,8 +129,8 @@ class CateyeSRTM():
 		return self.getImageFromTiles(txmin, txmax,	tymin, tymax)
 
 	def	getImageFromAll(self):
-		txmin, txmax = self.getTilesX(self.lonFromTo)
-		tymin, tymax = self.getTilesY(self.latFromTo)
+		txmin, txmax = self.tileX[0], self.tileX[1]
+		tymin, tymax = self.tileY[0], self.tileY[1]
 		print (txmin, txmax, tymin,	tymax)
 		self.getImageFromTiles(txmin, txmax, tymin,	tymax)
 
@@ -138,10 +138,12 @@ class CateyeSRTM():
 		self.downloadFromTo(self.lonFromTo,	self.latFromTo)
 
 	def Process(self, out_root, minLon, minLat, maxLon, maxLat):
-		self.Process(out_root, [minLon, maxLon], [minLat, maxLat])
+		self._process(out_root, [minLon, maxLon], [minLat, maxLat])
 
-	def	Process(self, out_root, lonFromTo, latFromTo):
+	def	_process(self, out_root, lonFromTo, latFromTo):
 		#A.	get	imagefiles
+		if not os.path.exists(out_root):
+			os.mkdir(out_root)
 		demfile = out_root + '/dem.vrt'
 		if not os.path.exists(demfile):
 			print "generate dem file..."
@@ -165,10 +167,24 @@ class CateyeSRTM():
 			print "generate color_shade image"
 			self.hsv_merge(color, shade, color_shade)
 
+	def genarate_color(self, srcfile, dstfile):
+		gdaldem = os.path.join(basic.HOME, "gdaldem")
+		argv = [gdaldem,'color-relief', srcfile, 'terrain.txt', dstfile]
+		return subprocess.call(argv)
+
+	def generate_hillshade(self, srcfile, dstfile):
+		gdaldem = os.path.join(basic.HOME, "gdaldem")
+		argv = [gdaldem, "hillshade", srcfile,
+					dstfile, '-z', '5.0', '-s', '111120.0', '-az', '90.0', '-alt', '90.0']
+		return subprocess.call(argv)
+
+	def hsv_merge(self, colorfile, shadefile, mergefile):
+		argv = ['python','hsv_merge.py', colorfile, shadefile, mergefile]
+		return subprocess.call(argv)
+
 if __name__	== "__main__":
 	print "**"
-
-	#srtm =	SRTM("D:/person/srtm")
+	srtm = 	CateyeSRTM("D:/person/work/srtm")
 	#srtm.download(112.5000005,37.5000001)
 	#srtm.getImageFromAll()
 	#srtm.getImageFromTiles(58,	60,	4, 6)
@@ -181,5 +197,5 @@ if __name__	== "__main__":
 	#srtm.downloadTile(60, 04)
 	#srtm.downloadTile(60, 05)
 	#srtm.downloadTile(60, 06)
-	#srtm.downloadAll()
-	#print "success"
+	srtm.getImageFromAll()
+	print "success"
