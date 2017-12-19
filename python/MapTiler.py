@@ -26,6 +26,7 @@ class MapTiler():
 		print jsonvalues
 		self.work_root = jsonvalues["root"]
 		print "work_root:" + self.work_root
+		basic.HOME = jsonvalues["exe_root"]
 		bound_type = jsonvalues["bound"]["type"]
 		print bound_type
 		if bound_type == "raster":
@@ -45,13 +46,22 @@ class MapTiler():
 		for work in works:
 			self.process(work)
 
+	def work_done(self, work):
+		tilemapresource = os.path.join(self.work_root,work["name"], "tilemapresource.xml")
+		if os.path.exists(tilemapresource):
+			return True 
+		return False
+
 	def process(self, work):
+		if self.work_done(work):
+			return
+		
 		srcfile = os.path.join(self.work_root, work["src"]["value"])
 		out_root = os.path.join(self.work_root, work["name"])
 		if not os.path.exists(srcfile):
 			s = drivers[work["src"]["type"]].Create(work["src"]["root"])
-			s.Process(out_root, self.minLon, self.minLat, self.maxLon, self.maxLat)
-		
+			s.Process(self.work_root, self.minLon, self.minLat, self.maxLon, self.maxLat)
+			
 		d = drivers[work['dst']['type']].Create(out_root)
 		tiledriver = self.tiledriver
 		tileext = self.tileext
