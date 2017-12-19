@@ -9,7 +9,7 @@ import os
 import os.path
 import requests
 import threading
-
+import shutil
 
 def FileStreamIO(start, end, url, filename):
 	headers = {'Range': 'bytes=%d-%d' % (start, end)}
@@ -82,6 +82,8 @@ def DownloadFile(url, dst, num_thread = 4):
 def DecodeZipfile(srcfile, dstdir):
 	import zipfile
 	try:
+		if not os.path.exists(dstdir):
+			os.mkdir(dstdir)
 		files = zipfile.ZipFile(srcfile,'r')
 		for filename in files.namelist():
 			data = files.read(filename)
@@ -89,9 +91,11 @@ def DecodeZipfile(srcfile, dstdir):
 			file.write(data)
 			file.close()
 		files.close()
+		return True
 	except:
 		print "cannot Decode the zip file: " + srcfile
-		return
+		shutil.rmtree(dstdir)
+		return False
 
 def LoadEngine():
 	import re
@@ -108,3 +112,5 @@ def LoadEngine():
 			DataDriver[match.group(1)] = drvier_module
 
 	return DataDriver
+
+HOME = ""
