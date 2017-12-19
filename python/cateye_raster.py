@@ -196,7 +196,7 @@ class CateyeRaster:
 
 		return Raster(filepath)
 
-	def Process(self, out_root, minLon, minLat, maxLon, maxLat):
+	def Process(self, out_root, minLon, minLat, maxLon, maxLat, minZoom, maxZoom):
 		pass
 
 	def write(self, filepath, dataset):
