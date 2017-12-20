@@ -1,0 +1,76 @@
+{
+	"root":
+	{
+		"work" : "D:/person/work/gujiao",
+		"srtm" : "D:/person/work/srtm",
+		"gdal" : "C:/Program Files/QGIS Brighton/bin"
+	},
+	
+	"bound": {
+		"type"	: "raster",
+		"value" : "D:/person/work/gujiao/gujiao.tif"
+	},
+	
+	"tilesize": 256,
+	"tiledriver": "PNG",
+	"tileext": "png",
+	
+	"works": [
+		{
+			"name"	: "raster",
+			"src"	: 
+			{	"type"	: "raster",
+				"value" : "gujiao.tif"
+			},
+			
+			"dst": 
+			{
+				"type": "mercator"
+			}
+		},
+		
+		{
+			"name"	:	"raster_dem", 
+			"src":
+			{
+				"type": "raster",
+				"value": "gujiao_dem.tif"
+			},
+
+			"dst": 
+			{
+				"type": "mercator",
+				"tiledriver": "GTiff",
+				"tileext": "tif"
+			}
+		},
+
+		{
+			"name":	"raster_color_shade",
+			"src":
+			{
+				"type": "gdal",
+				"commands": [
+					{	
+						"command" : "gdal_dem2color.py",
+						"params"  : ["gujiao_dem.tif", "gujiao_dem_color.tif"]
+					},
+					{
+						"command" : "gdal_dem2shade.py",
+						"params"  : ["gujiao_dem.tif", "gujiao_dem_shade.tif"]
+					},
+					{
+						"command" : "gdal_hsv_merge.py",
+						"params"  : ["gujiao_dem_color.tif", "gujiao_dem_shade.tif", "gujiao_color_shade.tif"]
+					}],
+
+				"value" : "gujiao_color_shade.tif"
+			},
+			"dst": 
+			{
+				"type": "mercator"
+			}
+		}
+		
+	]
+}
