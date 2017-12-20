@@ -11,7 +11,7 @@ def Create(workdir):
 	return CateyeMercator(workdir)
 
 class CateyeMercator():
-	def __init__(self,  workdir):
+	def __init__(self, workdir):
 		self.workdir = workdir
 
 	def Process(self, imagefile, tilesize, tiledriver, tileext):

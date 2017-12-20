@@ -18,17 +18,15 @@ class MapTiler():
 		self.tilesize = 256
 		self.tiledriver = "PNG"
 		self.tileext = "png"
-		self.work_root = ""
 
 	def ProcessFromJson(self, jsonfile):
 		import json
 		jsonvalues = json.load(file(jsonfile))
-		print jsonvalues
-		self.work_root = jsonvalues["root"]
-		print "work_root:" + self.work_root
-		basic.HOME = jsonvalues["exe_root"]
+		
+		self.root = jsonvalues["root"]
+		
 		bound_type = jsonvalues["bound"]["type"]
-		print bound_type
+		
 		if bound_type == "raster":
 			raster = drivers["raster"].Create(jsonvalues["bound"]["value"])
 			self.minLat, self.minLon, self.maxLat, self.maxLon = raster.LatLonBound()
@@ -47,7 +45,8 @@ class MapTiler():
 			self.process(work)
 
 	def work_done(self, work):
-		tilemapresource = os.path.join(self.work_root,work["name"], "tilemapresource.xml")
+		print self.root["work"]
+		tilemapresource = os.path.join(self.root["work"], work["name"], "tilemapresource.xml")
 		if os.path.exists(tilemapresource):
 			return True 
 		return False
@@ -56,12 +55,20 @@ class MapTiler():
 		if self.work_done(work):
 			return
 		
-		srcfile = os.path.join(self.work_root, work["src"]["value"])
-		out_root = os.path.join(self.work_root, work["name"])
+		srcfile = os.path.join(self.root["work"], work["src"]["value"])
+		print srcfile
 		if not os.path.exists(srcfile):
-			s = drivers[work["src"]["type"]].Create(work["src"]["root"])
-			s.Process(self.work_root, self.minLon, self.minLat, self.maxLon, self.maxLat)
-			
+			datatype = work["src"]["type"]
+			s = drivers[datatype].Create(self.root[datatype])
+			if "commands" in work["src"]:
+				commands =  work["src"]["commands"]
+				for command in commands:
+					print command
+					s.Process(self.root["work"], command["command"], command["params"])
+			else:	
+				s.Process(self.work_root, self.minLon, self.minLat, self.maxLon, self.maxLat)
+		
+		out_root = os.path.join(self.root["work"], work["name"])	
 		d = drivers[work['dst']['type']].Create(out_root)
 		tiledriver = self.tiledriver
 		tileext = self.tileext

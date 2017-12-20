@@ -179,7 +179,7 @@ class CateyeSRTM():
 		return subprocess.call(argv)
 
 	def hsv_merge(self, colorfile, shadefile, mergefile):
-		argv = ['python','hsv_merge.py', colorfile, shadefile, mergefile]
+		argv = ['python','gdal_hsv_merge.py', colorfile, shadefile, mergefile]
 		return subprocess.call(argv)
 
 if __name__	== "__main__":

@@ -45,36 +45,36 @@ import sys
 #
 def rgb_to_hsv( r,g,b ):
 
-    maxc = numpy.maximum(r,numpy.maximum(g,b))
-    minc = numpy.minimum(r,numpy.minimum(g,b))
+	maxc = numpy.maximum(r,numpy.maximum(g,b))
+	minc = numpy.minimum(r,numpy.minimum(g,b))
 
-    v = maxc
+	v = maxc
 
-    minc_eq_maxc = numpy.equal(minc,maxc)
+	minc_eq_maxc = numpy.equal(minc,maxc)
 
-    # compute the difference, but reset zeros to ones to avoid divide by zeros later.
-    ones = numpy.ones((r.shape[0],r.shape[1]))
-    maxc_minus_minc = numpy.choose( minc_eq_maxc, (maxc-minc,ones) )
+	# compute the difference, but reset zeros to ones to avoid divide by zeros later.
+	ones = numpy.ones((r.shape[0],r.shape[1]))
+	maxc_minus_minc = numpy.choose( minc_eq_maxc, (maxc-minc,ones) )
 
-    s = (maxc-minc) / numpy.maximum(ones,maxc)
-    rc = (maxc-r) / maxc_minus_minc
-    gc = (maxc-g) / maxc_minus_minc
-    bc = (maxc-b) / maxc_minus_minc
+	s = (maxc-minc) / numpy.maximum(ones,maxc)
+	rc = (maxc-r) / maxc_minus_minc
+	gc = (maxc-g) / maxc_minus_minc
+	bc = (maxc-b) / maxc_minus_minc
 
-    maxc_is_r = numpy.equal(maxc,r)
-    maxc_is_g = numpy.equal(maxc,g)
-    maxc_is_b = numpy.equal(maxc,b)
+	maxc_is_r = numpy.equal(maxc,r)
+	maxc_is_g = numpy.equal(maxc,g)
+	maxc_is_b = numpy.equal(maxc,b)
 
-    h = numpy.zeros((r.shape[0],r.shape[1]))
-    h = numpy.choose( maxc_is_b, (h,4.0+gc-rc) )
-    h = numpy.choose( maxc_is_g, (h,2.0+rc-bc) )
-    h = numpy.choose( maxc_is_r, (h,bc-gc) )
+	h = numpy.zeros((r.shape[0],r.shape[1]))
+	h = numpy.choose( maxc_is_b, (h,4.0+gc-rc) )
+	h = numpy.choose( maxc_is_g, (h,2.0+rc-bc) )
+	h = numpy.choose( maxc_is_r, (h,bc-gc) )
 
-    h = numpy.mod(h/6.0,1.0)
+	h = numpy.mod(h/6.0,1.0)
 
-    hsv = numpy.asarray([h,s,v])
-    
-    return hsv
+	hsv = numpy.asarray([h,s,v])
+		
+	return hsv
 
 # =============================================================================
 # hsv_to_rgb()
@@ -84,48 +84,51 @@ def rgb_to_hsv( r,g,b ):
 
 def hsv_to_rgb( hsv ):
 
-    h = hsv[0]
-    s = hsv[1]
-    v = hsv[2]
+	h = hsv[0]
+	s = hsv[1]
+	v = hsv[2]
 
-    #if s == 0.0: return v, v, v
-    i = (h*6.0).astype(int)
-    f = (h*6.0) - i
-    p = v*(1.0 - s)
-    q = v*(1.0 - s*f)
-    t = v*(1.0 - s*(1.0-f))
+	#if s == 0.0: return v, v, v
+	i = (h*6.0).astype(int)
+	f = (h*6.0) - i
+	p = v*(1.0 - s)
+	q = v*(1.0 - s*f)
+	t = v*(1.0 - s*(1.0-f))
 
-    r = i.choose( v, q, p, p, t, v )
-    g = i.choose( t, v, v, q, p, p )
-    b = i.choose( p, p, t, v, v, q )
+	r = i.choose( v, q, p, p, t, v )
+	g = i.choose( t, v, v, q, p, p )
+	b = i.choose( p, p, t, v, v, q )
 
-    rgb = numpy.asarray([r,g,b]).astype(numpy.uint8)
-    
-    return rgb
+	rgb = numpy.asarray([r,g,b]).astype(numpy.uint8)
+		
+	return rgb
 
 # =============================================================================
 # Usage()
 
 def Usage():
-    print("""
-hsv_merge.py src_rgb src_greyscale dst_rgb.tif
-""")
-    sys.exit(1)
-    
+	print("""
+	gdal_hsv_merge.py work_root src_rgb src_greyscale dst_rgb.tif
+	""")
+	sys.exit(1)
+		
 # =============================================================================
 # 	Mainline
 # =============================================================================
 
 argv = gdal.GeneralCmdLineProcessor( sys.argv )
 if argv is None:
-    sys.exit( 0 )
+	sys.exit( 0 )
 
-if len(argv) != 4:
-    Usage()
-    
-src_rgb_filename = argv[1]
-src_greyscale_filename = argv[2]
-dst_rgb_filename = argv[3]
+if len(argv) != 5:
+	Usage()
+
+import os
+
+work_root = argv[1]		
+src_rgb_filename = os.path.join(work_root,argv[2])
+src_greyscale_filename = os.path.join(work_root, argv[3])
+dst_rgb_filename = os.path.join(work_root, argv[4])
 format = 'GTiff'
 type = GDT_Byte
 
@@ -134,13 +137,13 @@ colordataset = gdal.Open( src_rgb_filename, GA_ReadOnly )
 
 #check for 3 bands in the color file
 if (colordataset.RasterCount != 3):
-    print 'Source image does not appear to have three bands as required.'
-    sys.exit(1)
+	print 'Source image does not appear to have three bands as required.'
+	sys.exit(1)
 
 #define output format, name, size, type and set projection
 out_driver = gdal.GetDriverByName(format)
 outdataset = out_driver.Create(dst_rgb_filename, colordataset.RasterXSize, \
-                   colordataset.RasterYSize, colordataset.RasterCount, type)
+					colordataset.RasterYSize, colordataset.RasterCount, type)
 outdataset.SetProjection(hilldataset.GetProjection())
 outdataset.SetGeoTransform(hilldataset.GetGeoTransform())
 
@@ -152,36 +155,36 @@ hillband = hilldataset.GetRasterBand(1)
 
 #check for same file size
 if ((rBand.YSize != hillband.YSize) or (rBand.XSize != hillband.XSize)):
-    print 'Color and hilshade must be the same size in pixels.'
-    sys.exit(1)
+	print 'Color and hilshade must be the same size in pixels.'
+	sys.exit(1)
 
 #set progress bar to 0
 #gdal.TermProgress( 0.0 )
 
 #loop over lines to apply hillshade
 for i in range(hillband.YSize - 1, -1, -1):
-    #load RGB and Hillshade arrays
-    rScanline = rBand.ReadAsArray(0, i, hillband.XSize, 1, hillband.XSize, 1)
-    gScanline = gBand.ReadAsArray(0, i, hillband.XSize, 1, hillband.XSize, 1)
-    bScanline = bBand.ReadAsArray(0, i, hillband.XSize, 1, hillband.XSize, 1)
-    hillScanline = hillband.ReadAsArray(0, i, hillband.XSize, 1, hillband.XSize, 1)
+	#load RGB and Hillshade arrays
+	rScanline = rBand.ReadAsArray(0, i, hillband.XSize, 1, hillband.XSize, 1)
+	gScanline = gBand.ReadAsArray(0, i, hillband.XSize, 1, hillband.XSize, 1)
+	bScanline = bBand.ReadAsArray(0, i, hillband.XSize, 1, hillband.XSize, 1)
+	hillScanline = hillband.ReadAsArray(0, i, hillband.XSize, 1, hillband.XSize, 1)
 
-    #convert to HSV
-    hsv = rgb_to_hsv( rScanline, gScanline, bScanline )
-    
-    #replace v with hillshade
-    hsv_adjusted = numpy.asarray( [hsv[0], hsv[1], hillScanline] )
-    
-    #convert back to RGB
-    dst_rgb = hsv_to_rgb( hsv_adjusted )
+	#convert to HSV
+	hsv = rgb_to_hsv( rScanline, gScanline, bScanline )
+		
+	#replace v with hillshade
+	hsv_adjusted = numpy.asarray( [hsv[0], hsv[1], hillScanline] )
+		
+	#convert back to RGB
+	dst_rgb = hsv_to_rgb( hsv_adjusted )
 
-    #write out new RGB bands to output one band at a time
-    outband = outdataset.GetRasterBand(1)
-    outband.WriteArray(dst_rgb[0], 0, i)
-    outband = outdataset.GetRasterBand(2)
-    outband.WriteArray(dst_rgb[1], 0, i)
-    outband = outdataset.GetRasterBand(3)
-    outband.WriteArray(dst_rgb[2], 0, i)
-    
-    #update progress line
-    gdal.TermProgress( 1.0 - (float(i) / hillband.YSize) )
+	#write out new RGB bands to output one band at a time
+	outband = outdataset.GetRasterBand(1)
+	outband.WriteArray(dst_rgb[0], 0, i)
+	outband = outdataset.GetRasterBand(2)
+	outband.WriteArray(dst_rgb[1], 0, i)
+	outband = outdataset.GetRasterBand(3)
+	outband.WriteArray(dst_rgb[2], 0, i)
+		
+	#update progress line
+	gdal.TermProgress( 1.0 - (float(i) / hillband.YSize) )

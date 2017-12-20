@@ -38,12 +38,12 @@
 import sys
 
 try:
-    from osgeo import gdal
-    from osgeo import osr
+	from osgeo import gdal
+	from osgeo import osr
 except:
-    import gdal
-    print('You are using "old gen" bindings. gdal2tiles needs "new gen" bindings.')
-    sys.exit(1)
+	import gdal
+	print('You are using "old gen" bindings. gdal2tiles needs "new gen" bindings.')
+	sys.exit(1)
 
 import os
 import math
@@ -2242,14 +2242,14 @@ gdal2tiles temp.vrt""" % self.input )
 # =============================================================================
 
 def run(argv = None):
-    if argv is None:
-        argv = sys.argv
-    argv = gdal.GeneralCmdLineProcessor( argv )
-    if argv:
-        gdal2tiles = GDAL2Tiles( argv[1:] )
-        gdal2tiles.process()
+	if argv is None:
+		argv = sys.argv
+	argv = gdal.GeneralCmdLineProcessor( argv )
+	if argv:
+		gdal2tiles = GDAL2Tiles( argv[1:] )
+		gdal2tiles.process()
 
 if __name__=='__main__':
-    run(sys.argv)
+	run(sys.argv)
 
 
