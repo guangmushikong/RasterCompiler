@@ -22,11 +22,11 @@ class MapTiler():
 	def ProcessFromJson(self, jsonfile):
 		import json
 		jsonvalues = json.load(file(jsonfile))
-		
+
 		self.root = jsonvalues["root"]
-		
+
 		bound_type = jsonvalues["bound"]["type"]
-		
+
 		if bound_type == "raster":
 			raster = drivers["raster"].Create(jsonvalues["bound"]["value"])
 			self.minLat, self.minLon, self.maxLat, self.maxLon = raster.LatLonBound()
@@ -48,13 +48,13 @@ class MapTiler():
 		print self.root["work"]
 		tilemapresource = os.path.join(self.root["work"], work["name"], "tilemapresource.xml")
 		if os.path.exists(tilemapresource):
-			return True 
+			return True
 		return False
 
 	def process(self, work):
 		if self.work_done(work):
 			return
-		
+
 		srcfile = os.path.join(self.root["work"], work["src"]["value"])
 		print srcfile
 		if not os.path.exists(srcfile):
@@ -65,14 +65,18 @@ class MapTiler():
 				for command in commands:
 					print command
 					s.Process(self.root["work"], command["command"], command["params"])
-			else:	
+			else:
 				s.Process(self.work_root, self.minLon, self.minLat, self.maxLon, self.maxLat)
-		
-		out_root = os.path.join(self.root["work"], work["name"])	
+
+		out_root = os.path.join(self.root["work"], work["name"])
+
+		if "dst" not in work:
+			return
+
 		d = drivers[work['dst']['type']].Create(out_root)
 		tiledriver = self.tiledriver
 		tileext = self.tileext
-	
+
 		if "tiledriver" in work["dst"]:
 			tiledriver = work["dst"]["tiledriver"]
 		if "tileext" in work["dst"]:
@@ -91,13 +95,14 @@ class MapTiler():
 		s.Process(self.work_root, self.minLon, self.minLat, self.maxLon, self.maxLat)
 		shade = os.path.join(self.work_root, "color_shade.tif")
 		d = drivers[shade["dst"]["type"]].Create(shade["dst"]["root"])
-		d.Process(shade, 256, 'PNG', 'png')	
+		d.Process(shade, 256, 'PNG', 'png')
 
 	def process_raster(self, raster):
 		d = drivers[raster["dst"]["type"]].Create(raster["dst"]["root"])
 		d.Process(raster["src"]["root"], self.tilesize, self.tiledriver, self.tileext)
 
 	def postProcess(self):
+		print "post process"
 		pass
 
 

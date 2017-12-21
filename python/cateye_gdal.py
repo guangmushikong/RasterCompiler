@@ -35,7 +35,7 @@ class CateyeGdal():
 		return subprocess.call(argv)
 
 	def translate(self, src, dst):
-		gdal_translate = os.path.join(GDAL_ROOT, "gdal_translate")
+		gdal_translate = os.path.join(self.gdal_root, "gdal_translate")
 		argv = [gdal_translate, "-of", "GTiff", "-co", "TILED=YES", "-co", "BLOCKXSIZE=256", "-co", "BLOCKYSIZE=256", src, dst]
 		return subprocess.call(argv)
 
