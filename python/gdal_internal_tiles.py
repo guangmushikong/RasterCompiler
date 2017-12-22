@@ -8,8 +8,6 @@ def process(work_root, src, dst, epsg = None, tilesize = 256):
 	#gdalwarp = os.path.join(self.gdal_root, "gdalwarp")
 	srcfile = os.path.join(work_root, src)
 	dstfile = os.path.join(work_root, dst)
-	if os.path.exists(dstfile):
-		return
 
 	if epsg is not None:
 		subprocess.call(["gdalwarp", "-t_srs " + str(epsg), srcfile, dstfile])
@@ -17,7 +15,7 @@ def process(work_root, src, dst, epsg = None, tilesize = 256):
 	subprocess.call(["gdal_translate", "-of", "GTiff", "-co", "TILED=YES", "-co", "BLOCKXSIZE="+str(tilesize),
 		 "-co", "BLOCKYSIZE=" + str(tilesize), srcfile, dstfile])
 
-	subprocess.call(["gdaladdo", "-r", "averge", dstfile])
+	subprocess.call(["gdaladdo", "-r", "average", dstfile, "2", "4", "8", "16"])
 
 # =============================================================================
 
