@@ -901,7 +901,7 @@ gdal2tiles temp.vrt""" % self.input )
 
 		# Get alpha band (either directly or from NODATA value)
 		self.alphaband = self.out_ds.GetRasterBand(1).GetMaskBand()
-		if (self.alphaband.GetMaskFlags() & gdal.GMF_ALPHA) or self.out_ds.RasterCount==4 or self.out_ds.RasterCount==2:
+		if (self.alphaband.GetMaskFlags() & gdal.GMF_ALPHA) or self.out_ds.RasterCount == 4 or self.out_ds.RasterCount == 2:
 			# TODO: Better test for alpha band in the dataset
 			self.dataBandsCount = self.out_ds.RasterCount - 1
 		else:
@@ -1171,7 +1171,8 @@ gdal2tiles temp.vrt""" % self.input )
 		#tmaxy = tminy
 
 		ds = self.out_ds
-		tilebands = self.dataBandsCount + 1
+		tilebands = self.dataBandsCount
+
 		querysize = self.querysize
 
 		if self.options.verbose:
@@ -1263,12 +1264,13 @@ gdal2tiles temp.vrt""" % self.input )
 				# Tile dataset in memory
 				dstile = self.mem_drv.Create('', self.tilesize, self.tilesize,  tilebands, self.in_ds.GetRasterBand(1).DataType)
 				data = ds.ReadRaster(rx, ry, rxsize, rysize, wxsize, wysize, band_list=list(range(1,self.dataBandsCount+1)))
-				alpha = self.alphaband.ReadRaster(rx, ry, rxsize, rysize, wxsize, wysize)
+				
+				#alpha = self.alphaband.ReadRaster(rx, ry, rxsize, rysize, wxsize, wysize)
 
 				if self.tilesize == querysize:
 					# Use the ReadRaster result directly in tiles ('nearest neighbour' query)
 					dstile.WriteRaster(wx, wy, wxsize, wysize, data, band_list=list(range(1,self.dataBandsCount+1)))
-					dstile.WriteRaster(wx, wy, wxsize, wysize, alpha, band_list=[tilebands])
+					#dstile.WriteRaster(wx, wy, wxsize, wysize, alpha, band_list=[tilebands])
 
 					# Note: For source drivers based on WaveLet compression (JPEG2000, ECW, MrSID)
 					# the ReadRaster function returns high-quality raster (not ugly nearest neighbour)
@@ -1280,7 +1282,8 @@ gdal2tiles temp.vrt""" % self.input )
 					#for i in range(1, tilebands+1):
 					#	dsquery.GetRasterBand(1).Fill(tilenodata)
 					dsquery.WriteRaster(wx, wy, wxsize, wysize, data, band_list=list(range(1,self.dataBandsCount+1)))
-					dsquery.WriteRaster(wx, wy, wxsize, wysize, alpha, band_list=[tilebands])
+					
+					#dsquery.WriteRaster(wx, wy, wxsize, wysize, alpha, band_list=[tilebands])
 
 					self.scale_query_to_tile(dsquery, dstile, tilefilename)
 					del dsquery
@@ -1310,7 +1313,7 @@ gdal2tiles temp.vrt""" % self.input )
 
 		print("Generating Overview Tiles:")
 
-		tilebands = self.dataBandsCount + 1
+		tilebands = self.dataBandsCount
 
 		# Usage of existing tiles: from 4 underlying tiles generate one as overview.
 
@@ -1377,7 +1380,7 @@ gdal2tiles temp.vrt""" % self.input )
 									tileposx = 0
 								dsquery.WriteRaster( tileposx, tileposy, self.tilesize, self.tilesize,
 									dsquerytile.ReadRaster(0,0,self.tilesize,self.tilesize),
-									band_list=list(range(1,tilebands+1)))
+									band_list=list(range(1, tilebands + 1)))
 								children.append( [x, y, tz + 1] )
 
 					self.scale_query_to_tile(dsquery, dstile, tilefilename)
