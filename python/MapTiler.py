@@ -66,7 +66,7 @@ class MapTiler():
 					print command
 					s.Process(self.root["work"], command["command"], command["params"])
 			else:
-				s.Process(self.work_root, self.minLon, self.minLat, self.maxLon, self.maxLat)
+				s.Process(self.root["work"], self.minLon, self.minLat, self.maxLon, self.maxLat)
 
 		out_root = os.path.join(self.root["work"], work["name"])
 
