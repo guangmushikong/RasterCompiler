@@ -59,6 +59,8 @@ class MapTiler():
 		print srcfile
 		if not os.path.exists(srcfile):
 			datatype = work["src"]["type"]
+			print datatype
+			print self.root[datatype]
 			s = drivers[datatype].Create(self.root[datatype])
 			if "commands" in work["src"]:
 				commands =  work["src"]["commands"]

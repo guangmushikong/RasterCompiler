@@ -7,7 +7,12 @@ Created on Thu Oct 12 11:02:12 2017
 
 import os
 import os.path
-import requests
+import subprocess
+
+try :
+	import requests
+except:
+	subprocess.call("pip install requests")
 import threading
 import shutil
 

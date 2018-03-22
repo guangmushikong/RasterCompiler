@@ -11,7 +11,9 @@ try:
 	from osgeo import gdal
 	from osgeo import osr
 except:
-	import gdal
+	subprocess.call("pip install osgeo")
+	from osgeo import gdal
+	from osgeo import osr
 	sys.exit(1)
 
 
